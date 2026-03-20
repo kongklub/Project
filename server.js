@@ -20,31 +20,6 @@ app.get('/', (req, res) => {
   res.send('NT Equipment API Running 🚀');
 });
 
-// get all equipments
-app.get('/equipments', async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT 
-        e.id,
-        e.asset_code,
-        e.name,
-        c.name AS category,
-        s.name AS status,
-        l.province,
-        l.building,
-        l.floor
-      FROM equipments e
-      LEFT JOIN categories c ON e.category_id = c.id
-      LEFT JOIN equipment_status s ON e.status_id = s.id
-      LEFT JOIN locations l ON e.location_id = l.id
-    `);
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Database error' });
-  }
-});
-
 // create equipment
 app.post('/equipments', async (req, res) => {
   try {
@@ -131,10 +106,19 @@ app.get('/equipments', async (req, res) => {
     const { asset_code, status_id } = req.query;
 
     let query = `
-      SELECT e.*, c.name AS category, s.name AS status
+      SELECT 
+        e.id,
+        e.asset_code,
+        e.name,
+        c.name AS category,
+        s.name AS status,
+        l.province,
+        l.building,
+        l.floor
       FROM equipments e
       LEFT JOIN categories c ON e.category_id = c.id
       LEFT JOIN equipment_status s ON e.status_id = s.id
+      LEFT JOIN locations l ON e.location_id = l.id
       WHERE 1=1
     `;
 
